@@ -17,7 +17,7 @@ end
 
 eigvals(nv)
 
-L = 1.43486e8 /4
+L = 8568.38 /4
 
 function f(x) 
     sum([-y[i]*dot(vec(nu[i,1:3]),x)+log(1+exp(dot(vec(nu[i,1:3]),x))) for i = 1:400])
@@ -29,25 +29,32 @@ function gradf(x)
         M[:,i] = [-y[i]*vec(nu[i,1:3]')+vec(nu[i,1:3]')*exp(dot(vec(nu[i,1:3]),x))/(1+exp(dot(vec(nu[i,1:3]),x)))]
     end
     vec(sum(M,2))
-end  
+end   
 
-x = [0, 0.8,-5]
+x = zeros(3)
+fk = f(x)
+for itn = 1:20000
+    x = x - (1/L)*gradf(x)
+    fk = [fk;f(x)]
+end
+[x, fk]
+
+x = [ 0,0.8,-5 ] # line search algorithm
 c = 1/2
 alpha = 1
 fk = f(x)
-for itn = 1:10000
+for itn = 1:1000
     while f(x) - f(x - alpha*gradf(x))<alpha*c*(norm(gradf(x)))^2 
         alpha = (1/10)*alpha
     end
     x = x - alpha*gradf(x)
     fk = [fk;f(x)]
 end
-[x, fk]#x is the optimal a and beta values
+[x, fk]
 
 myarr = Admissions[1];
 
 admit = myarr[myarr[:,1].==1, 2:3];
-
 reject = myarr[myarr[:,1].==0, 2:3];
 
 using PyPlot
